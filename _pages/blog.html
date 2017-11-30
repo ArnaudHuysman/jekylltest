@@ -1,0 +1,20 @@
+---
+layout: base
+permalink: blog/index.html
+title: Blog
+---
+
+<h1>Blog archive</h1>
+<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus sit incidunt, quibusdam itaque soluta modi provident consectetur repellat reiciendis temporibus odit non repudiandae. Nemo eum debitis molestiae odio aliquam animi?</p>
+
+{% assign allBlogposts = site.posts %}
+{% for item in allBlogposts %}
+  {% if forloop.first %}<ul>{% endif %}
+
+    <li>
+      <h2><a href="{{ item.url }}">{{ item.title }}</a></h2>
+      <p>{{ item.summary }}</p>
+    </li>
+
+  {% if forloop.last %}<ul>{% endif %}
+{% endfor %}
