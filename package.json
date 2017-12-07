@@ -1,0 +1,24 @@
+{
+  "name": "jekyll-sandbox",
+  "version": "1.0.0",
+  "description": "simple jekyll website",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jeromecoupe/jekylltest.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jeromecoupe/jekylltest/issues"
+  },
+  "homepage": "https://github.com/jeromecoupe/jekylltest#readme",
+  "author": "Jérôme Coupé",
+  "license": "ISC",
+  "devDependencies": {
+    "browser-sync": "^2.18.13",
+    "gulp": "^3.9.1",
+    "gulp-image-resize": "^0.13.0",
+    "merge2": "^1.2.0"
+  },
+  "dependencies": {
+    "del": "^3.0.0"
+  }
+}

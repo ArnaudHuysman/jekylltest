@@ -20,13 +20,14 @@ url: "" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: jeromecoupe
 github_username:  jeromecoupe
 
-# defaults
+# collections
 collections:
   posts:
     output: true
   works:
     output: true
 
+# defaults
 defaults:
   - scope:
       path: ""
@@ -40,7 +41,7 @@ defaults:
       type: works
     values:
       permalink: /work/:title/
-      layout: base
+      layout: works
       currentNav: work
 
 
@@ -51,7 +52,16 @@ markdown: kramdown
 exclude:
   - Gemfile
   - Gemfile.lock
+  - gulpfile.js
+  - package-lock.json
+  - package.json
+  - node_modules
+  - assets # managed by Gulp
 
 # Include from processing
 include:
   - _pages
+
+# Do not delete from _site when generating the site
+keep_files:
+  - assets
