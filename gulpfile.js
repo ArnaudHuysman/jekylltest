@@ -10,6 +10,9 @@ var autoprefixer  = require('autoprefixer');
 var cssnano       = require('cssnano');
 var rename        = require('gulp-rename');
 var sourcemaps    = require('gulp-sourcemaps');
+var uglify        = require('gulp-uglify');
+var webpackStream = require('webpack-stream');
+var webpackConfig = require('./webpack.config.js');
 
 // -------------------------------------
 // config
@@ -121,6 +124,20 @@ gulp.task('images:thumbs', ['images:thumbs:delete'], function() {
 });
 
 // -------------------------------------
+// JS
+// -------------------------------------
+gulp.task('build:js', function(){
+  return gulp.src('./assets/js/main.js')
+    .pipe(webpackStream( webpackConfig ))
+    .pipe(gulp.dest('./_site/assets/js/'))
+    .pipe(rename( {suffix: '.min'} ))
+    .pipe(uglify())
+    .pipe(gulp.dest('./_site/assets/js/'))
+    .pipe(browserSync.stream());
+});
+
+
+// -------------------------------------
 // CSS
 // -------------------------------------
 
@@ -157,7 +174,7 @@ gulp.task('rebuild:jekyll',['build:jekyll'] , function(){
 // tasks
 // -------------------------------------
 
-gulp.task('build', ['build:jekyll', 'build:css', 'images:thumbs']);
+gulp.task('build', ['build:jekyll', 'build:css', 'build:js', 'images:thumbs']);
 
 // -------------------------------------
 // watch
@@ -175,4 +192,5 @@ gulp.task('watch', ['browser-sync'], function(){
     '_config.yaml'
   ], ['rebuild:jekyll']);
   gulp.watch(['assets/scss/**/*'], ['build:css']);
+  gulp.watch(['assets/js/**/*'], ['build:js']);
 });
