@@ -1,9 +1,19 @@
-var gulp = require('gulp');
-var browserSync = require('browser-sync').create();
+var browserSync   = require('browser-sync').create();
+var cp            = require('child_process');
+var del           = require('del');
+var gulp          = require('gulp');
 var gulpImgResize = require('gulp-image-resize');
-var cp = require('child_process');
-var merge2 = require('merge2');
-var del = require('del');
+var merge2        = require('merge2');
+var sass          = require('gulp-sass');
+var postcss       = require('gulp-postcss');
+var autoprefixer  = require('autoprefixer');
+var cssnano       = require('cssnano');
+var rename        = require('gulp-rename');
+var sourcemaps    = require('gulp-sourcemaps');
+
+// -------------------------------------
+// config
+// -------------------------------------
 
 // image config
 var imgConfig = [
@@ -38,6 +48,24 @@ var imgConfig = [
     }
   }
 ]
+
+// -------------------------------------
+// browsersync
+// -------------------------------------
+
+// browsersync
+gulp.task('browser-sync', function() {
+  browserSync.init({
+      server: {
+          baseDir: "./_site/"
+      }
+  });
+});
+
+
+// -------------------------------------
+// images
+// -------------------------------------
 
 // delete thumbnails
 /**
@@ -92,14 +120,26 @@ gulp.task('images:thumbs', ['images:thumbs:delete'], function() {
 
 });
 
-// browsersync
-gulp.task('browser-sync', function() {
-  browserSync.init({
-      server: {
-          baseDir: "./_site/"
-      }
-  });
+// -------------------------------------
+// CSS
+// -------------------------------------
+
+// autoprefixer config in package.json (browserlist)
+gulp.task('build:css', function(){
+  return gulp.src('./assets/scss/main.scss')
+    .pipe(sourcemaps.init())
+    .pipe(sass( {outputStyle: 'expanded'} ))
+    .pipe(gulp.dest('./_site/assets/css/'))
+    .pipe(rename( {suffix: '.min'} ))
+    .pipe(postcss( [autoprefixer(), cssnano()] ))
+    .pipe(sourcemaps.write())
+    .pipe(gulp.dest('./_site/assets/css/'))
+    .pipe(browserSync.stream());
 });
+
+// -------------------------------------
+// jekyll
+// -------------------------------------
 
 // build jekyll
 gulp.task('build:jekyll', function(done){
@@ -112,6 +152,17 @@ gulp.task('rebuild:jekyll',['build:jekyll'] , function(){
   browserSync.reload();
 });
 
+
+// -------------------------------------
+// tasks
+// -------------------------------------
+
+gulp.task('build', ['build:jekyll', 'build:css', 'images:thumbs']);
+
+// -------------------------------------
+// watch
+// -------------------------------------
+
 // watch
 gulp.task('watch', ['browser-sync'], function(){
   gulp.watch([
@@ -123,4 +174,5 @@ gulp.task('watch', ['browser-sync'], function(){
     '_works/**/*',
     '_config.yaml'
   ], ['rebuild:jekyll']);
+  gulp.watch(['assets/scss/**/*'], ['build:css']);
 });
