@@ -1,15 +1,21 @@
-var browserSync   = require('browser-sync').create();
-var cp            = require('child_process');
-var del           = require('del');
-var gulp          = require('gulp');
-var gulpImgResize = require('gulp-image-resize');
-var merge2        = require('merge2');
-var sass          = require('gulp-sass');
-var postcss       = require('gulp-postcss');
-var autoprefixer  = require('autoprefixer');
-var cssnano       = require('cssnano');
-var rename        = require('gulp-rename');
-var sourcemaps    = require('gulp-sourcemaps');
+var browserSync     = require('browser-sync').create();
+var cp              = require('child_process');
+var del             = require('del');
+var gulp            = require('gulp');
+var gulpImgResize   = require('gulp-image-resize');
+var merge2          = require('merge2');
+var gulpSass        = require('gulp-sass');
+var gulpPostcss     = require('gulp-postcss');
+var autoprefixer    = require('autoprefixer');
+var cssnano         = require('cssnano');
+var gulpRename      = require('gulp-rename');
+var gulpSourcemaps  = require('gulp-sourcemaps');
+var gulpUglify      = require('gulp-uglify');
+var gulpPlumber     = require('gulp-plumber');
+var webpack         = require('webpack');
+var webpackStream   = require('webpack-stream');
+var webpackConfig   = require('./webpack.config.js');
+
 
 // -------------------------------------
 // config
@@ -121,18 +127,32 @@ gulp.task('images:thumbs', ['images:thumbs:delete'], function() {
 });
 
 // -------------------------------------
+// JS
+// -------------------------------------
+gulp.task('build:js', function(){
+  return gulp.src('./assets/js/main.js')
+  .pipe(gulpPlumber())
+  .pipe(webpackStream(webpackConfig, webpack))
+  .pipe(gulp.dest('./_site/assets/js/'))
+  .pipe(gulpRename({ suffix: '.min' }))
+  .pipe(gulpUglify())
+  .pipe(gulp.dest('./_site/assets/js/'));
+});
+
+
+// -------------------------------------
 // CSS
 // -------------------------------------
 
 // autoprefixer config in package.json (browserlist)
 gulp.task('build:css', function(){
   return gulp.src('./assets/scss/main.scss')
-    .pipe(sourcemaps.init())
-    .pipe(sass( {outputStyle: 'expanded'} ))
+    .pipe(gulpSourcemaps.init())
+    .pipe(gulpSass( {outputStyle: 'expanded'} ))
     .pipe(gulp.dest('./_site/assets/css/'))
-    .pipe(rename( {suffix: '.min'} ))
-    .pipe(postcss( [autoprefixer(), cssnano()] ))
-    .pipe(sourcemaps.write())
+    .pipe(gulpRename( {suffix: '.min'} ))
+    .pipe(gulpPostcss( [autoprefixer(), cssnano()] ))
+    .pipe(gulpSourcemaps.write())
     .pipe(gulp.dest('./_site/assets/css/'))
     .pipe(browserSync.stream());
 });
@@ -157,7 +177,7 @@ gulp.task('rebuild:jekyll',['build:jekyll'] , function(){
 // tasks
 // -------------------------------------
 
-gulp.task('build', ['build:jekyll', 'build:css', 'images:thumbs']);
+gulp.task('build', ['build:jekyll', 'build:css', 'build:js', 'images:thumbs']);
 
 // -------------------------------------
 // watch
@@ -175,4 +195,5 @@ gulp.task('watch', ['browser-sync'], function(){
     '_config.yaml'
   ], ['rebuild:jekyll']);
   gulp.watch(['assets/scss/**/*'], ['build:css']);
+  gulp.watch(['assets/js/**/*'], ['build:js']);
 });
