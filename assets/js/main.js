@@ -1,2 +1,2 @@
-import * as myAlert from './modules/alertMe.js';
-myAlert.alertMe("this is a message from module");
+import * as myAlerts from './modules/alertMe.js';
+myAlerts.alertMe('message from module');

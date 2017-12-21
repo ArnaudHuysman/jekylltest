@@ -1,5 +1,5 @@
-const alertMe = (text) => {
-  alert(text);
+const alertMe = function(message) {
+  alert(message);
 };
 
 export { alertMe };

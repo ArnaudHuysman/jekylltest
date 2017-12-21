@@ -1,18 +1,21 @@
-var browserSync   = require('browser-sync').create();
-var cp            = require('child_process');
-var del           = require('del');
-var gulp          = require('gulp');
-var gulpImgResize = require('gulp-image-resize');
-var merge2        = require('merge2');
-var sass          = require('gulp-sass');
-var postcss       = require('gulp-postcss');
-var autoprefixer  = require('autoprefixer');
-var cssnano       = require('cssnano');
-var rename        = require('gulp-rename');
-var sourcemaps    = require('gulp-sourcemaps');
-var uglify        = require('gulp-uglify');
-var webpackStream = require('webpack-stream');
-var webpackConfig = require('./webpack.config.js');
+var browserSync     = require('browser-sync').create();
+var cp              = require('child_process');
+var del             = require('del');
+var gulp            = require('gulp');
+var gulpImgResize   = require('gulp-image-resize');
+var merge2          = require('merge2');
+var gulpSass        = require('gulp-sass');
+var gulpPostcss     = require('gulp-postcss');
+var autoprefixer    = require('autoprefixer');
+var cssnano         = require('cssnano');
+var gulpRename      = require('gulp-rename');
+var gulpSourcemaps  = require('gulp-sourcemaps');
+var gulpUglify      = require('gulp-uglify');
+var gulpPlumber     = require('gulp-plumber');
+var webpack         = require('webpack');
+var webpackStream   = require('webpack-stream');
+var webpackConfig   = require('./webpack.config.js');
+
 
 // -------------------------------------
 // config
@@ -128,12 +131,12 @@ gulp.task('images:thumbs', ['images:thumbs:delete'], function() {
 // -------------------------------------
 gulp.task('build:js', function(){
   return gulp.src('./assets/js/main.js')
-    .pipe(webpackStream( webpackConfig ))
-    .pipe(gulp.dest('./_site/assets/js/'))
-    .pipe(rename( {suffix: '.min'} ))
-    .pipe(uglify())
-    .pipe(gulp.dest('./_site/assets/js/'))
-    .pipe(browserSync.stream());
+  .pipe(gulpPlumber())
+  .pipe(webpackStream(webpackConfig, webpack))
+  .pipe(gulp.dest('./_site/assets/js/'))
+  .pipe(gulpRename({ suffix: '.min' }))
+  .pipe(gulpUglify())
+  .pipe(gulp.dest('./_site/assets/js/'));
 });
 
 
@@ -144,12 +147,12 @@ gulp.task('build:js', function(){
 // autoprefixer config in package.json (browserlist)
 gulp.task('build:css', function(){
   return gulp.src('./assets/scss/main.scss')
-    .pipe(sourcemaps.init())
-    .pipe(sass( {outputStyle: 'expanded'} ))
+    .pipe(gulpSourcemaps.init())
+    .pipe(gulpSass( {outputStyle: 'expanded'} ))
     .pipe(gulp.dest('./_site/assets/css/'))
-    .pipe(rename( {suffix: '.min'} ))
-    .pipe(postcss( [autoprefixer(), cssnano()] ))
-    .pipe(sourcemaps.write())
+    .pipe(gulpRename( {suffix: '.min'} ))
+    .pipe(gulpPostcss( [autoprefixer(), cssnano()] ))
+    .pipe(gulpSourcemaps.write())
     .pipe(gulp.dest('./_site/assets/css/'))
     .pipe(browserSync.stream());
 });
